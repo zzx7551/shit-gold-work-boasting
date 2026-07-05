@@ -1,6 +1,8 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 
+const SITE_TITLE = '一坨屎都能包装成金子的找工作包装网站'
+
 const modes = [
   { value: 'resume', label: '简历包装' },
   { value: 'interview', label: '面试话术' }
@@ -23,16 +25,35 @@ const resume = reactive({
   summary:
     '具备较强的信息整理、跨部门沟通和执行推进能力，能够围绕业务目标拆解任务并推动结果落地。',
   skills: '需求沟通 / 进度跟踪 / 数据整理 / 文档沉淀 / 跨部门协作',
-  experience:
-    '负责日常项目进度跟进，协调相关同事按节点提交材料；整理过程数据和表格，输出阶段性复盘文档。',
-  projects:
-    '协助完成部门流程优化项目，梳理关键节点、明确责任分工，并推动信息同步机制落地。',
+  experience: [
+    {
+      id: 1,
+      time: '2024.03 - 至今',
+      organization: '某某公司',
+      role: '项目协调 / 运营支持',
+      description:
+        '负责日常项目进度跟进，协调相关同事按节点提交材料；整理过程数据和表格，输出阶段性复盘文档。'
+    }
+  ],
+  projects: [
+    {
+      id: 1,
+      time: '2024.05 - 2024.08',
+      name: '部门流程优化项目',
+      role: '项目协助',
+      description:
+        '协助完成部门流程优化项目，梳理关键节点、明确责任分工，并推动信息同步机制落地。'
+    }
+  ],
   education: '某某大学 / 本科 / 2020-2024',
   selfEvaluation:
     '做事认真稳定，沟通反馈及时，能够在不确定任务中主动补位，持续提升团队协作效率。'
 })
 
 const canTransform = computed(() => interviewInput.value.trim().length > 0 && !loading.value)
+
+let experienceId = 2
+let projectId = 2
 
 async function transformText() {
   if (!canTransform.value) return
@@ -72,6 +93,38 @@ function uploadAvatar(event) {
     resume.avatar = String(reader.result || '')
   }
   reader.readAsDataURL(file)
+}
+
+function addExperience() {
+  resume.experience.push({
+    id: experienceId++,
+    time: '',
+    organization: '',
+    role: '',
+    description: ''
+  })
+}
+
+function removeExperience(id) {
+  if (resume.experience.length <= 1) return
+  const index = resume.experience.findIndex((item) => item.id === id)
+  if (index !== -1) resume.experience.splice(index, 1)
+}
+
+function addProject() {
+  resume.projects.push({
+    id: projectId++,
+    time: '',
+    name: '',
+    role: '',
+    description: ''
+  })
+}
+
+function removeProject(id) {
+  if (resume.projects.length <= 1) return
+  const index = resume.projects.findIndex((item) => item.id === id)
+  if (index !== -1) resume.projects.splice(index, 1)
 }
 
 async function exportPdf() {
@@ -118,21 +171,23 @@ async function exportPdf() {
           {{ item.label }}
         </button>
       </nav>
-      <span class="nav-link">把话说漂亮，把事写像样</span>
+      <span class="nav-link">{{ SITE_TITLE }}</span>
     </header>
 
     <section v-if="mode === 'interview'" class="search-stage">
-      <h1>面试话术转换</h1>
+      <h1>{{ SITE_TITLE }}</h1>
       <p class="tagline">输入朴素表达，生成更适合面试场景的高阶说法</p>
 
       <div class="search-box">
         <textarea
           v-model="interviewInput"
           rows="1"
+          :disabled="loading"
           placeholder="输入你的大白话，比如：我啥也不会"
           @keydown.enter="handleEnter"
         />
         <button type="button" :disabled="!canTransform" @click="transformText">
+          <span v-if="loading" class="button-spinner" aria-hidden="true"></span>
           {{ loading ? '生成中' : '包装一下' }}
         </button>
       </div>
@@ -143,6 +198,13 @@ async function exportPdf() {
         </div>
 
         <p v-if="error" class="error">{{ error }}</p>
+        <div v-else-if="loading" class="loading-panel">
+          <div class="loader-ring" aria-hidden="true"></div>
+          <div>
+            <strong>正在生成包装句子<span class="loading-dots"></span></strong>
+            <p>正在把原话整理成更适合面试的表达，请稍等。</p>
+          </div>
+        </div>
         <p v-else-if="interviewOutput" class="result-text">{{ interviewOutput }}</p>
         <p v-else class="empty-text">
           示例：我啥也不会 → 我的学习能力非常强，心态开放，执行稳定，具备高成长潜力。
@@ -193,14 +255,83 @@ async function exportPdf() {
           <span>核心技能</span>
           <textarea v-model="resume.skills" rows="3" />
         </label>
-        <label>
-          <span>工作 / 实习经历</span>
-          <textarea v-model="resume.experience" rows="5" />
-        </label>
-        <label>
-          <span>项目经历</span>
-          <textarea v-model="resume.projects" rows="4" />
-        </label>
+        <div class="repeatable-group">
+          <div class="repeatable-head">
+            <span>工作 / 实习经历</span>
+            <button type="button" @click="addExperience">添加</button>
+          </div>
+          <div
+            v-for="(item, index) in resume.experience"
+            :key="item.id"
+            class="repeatable-card"
+          >
+            <div class="repeatable-card-head">
+              <strong>经历 {{ index + 1 }}</strong>
+              <button
+                type="button"
+                :disabled="resume.experience.length <= 1"
+                @click="removeExperience(item.id)"
+              >
+                删除
+              </button>
+            </div>
+            <div class="form-grid">
+              <label>
+                <span>时间</span>
+                <input v-model="item.time" placeholder="例如：2024.03 - 至今" />
+              </label>
+              <label>
+                <span>公司 / 组织</span>
+                <input v-model="item.organization" placeholder="例如：某某公司" />
+              </label>
+              <label>
+                <span>岗位 / 角色</span>
+                <input v-model="item.role" placeholder="例如：运营助理" />
+              </label>
+            </div>
+            <label>
+              <span>经历描述</span>
+              <textarea v-model="item.description" rows="4" />
+            </label>
+          </div>
+        </div>
+
+        <div class="repeatable-group">
+          <div class="repeatable-head">
+            <span>项目经历</span>
+            <button type="button" @click="addProject">添加</button>
+          </div>
+          <div v-for="(item, index) in resume.projects" :key="item.id" class="repeatable-card">
+            <div class="repeatable-card-head">
+              <strong>项目 {{ index + 1 }}</strong>
+              <button
+                type="button"
+                :disabled="resume.projects.length <= 1"
+                @click="removeProject(item.id)"
+              >
+                删除
+              </button>
+            </div>
+            <div class="form-grid">
+              <label>
+                <span>时间</span>
+                <input v-model="item.time" placeholder="例如：2024.05 - 2024.08" />
+              </label>
+              <label>
+                <span>项目名称</span>
+                <input v-model="item.name" placeholder="例如：流程优化项目" />
+              </label>
+              <label>
+                <span>项目角色</span>
+                <input v-model="item.role" placeholder="例如：项目协助" />
+              </label>
+            </div>
+            <label>
+              <span>项目描述</span>
+              <textarea v-model="item.description" rows="4" />
+            </label>
+          </div>
+        </div>
         <label>
           <span>教育经历</span>
           <textarea v-model="resume.education" rows="2" />
@@ -242,11 +373,25 @@ async function exportPdf() {
         </section>
         <section>
           <h3>工作 / 实习经历</h3>
-          <p>{{ resume.experience }}</p>
+          <div v-for="item in resume.experience" :key="item.id" class="resume-entry">
+            <div class="resume-entry-head">
+              <strong>{{ item.organization || '公司 / 组织' }}</strong>
+              <span>{{ item.time || '时间' }}</span>
+            </div>
+            <em>{{ item.role || '岗位 / 角色' }}</em>
+            <p>{{ item.description || '经历描述' }}</p>
+          </div>
         </section>
         <section>
           <h3>项目经历</h3>
-          <p>{{ resume.projects }}</p>
+          <div v-for="item in resume.projects" :key="item.id" class="resume-entry">
+            <div class="resume-entry-head">
+              <strong>{{ item.name || '项目名称' }}</strong>
+              <span>{{ item.time || '时间' }}</span>
+            </div>
+            <em>{{ item.role || '项目角色' }}</em>
+            <p>{{ item.description || '项目描述' }}</p>
+          </div>
         </section>
         <section>
           <h3>教育经历</h3>

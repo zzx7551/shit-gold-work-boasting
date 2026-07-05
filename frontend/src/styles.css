@@ -59,6 +59,11 @@ textarea {
 .nav-link {
   cursor: default;
   color: #555;
+  max-width: 50vw;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .module-nav button.active {
@@ -123,6 +128,11 @@ h1 {
   overflow: hidden;
 }
 
+.search-box textarea:disabled {
+  background: #f6f6f6;
+  color: #777;
+}
+
 .search-box button,
 .pdf-button {
   border: 0;
@@ -134,6 +144,10 @@ h1 {
 }
 
 .search-box button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border-left: 2px solid #111;
 }
 
@@ -180,6 +194,80 @@ h1 {
   font-size: 15px;
   line-height: 1.9;
   white-space: pre-line;
+}
+
+.loading-panel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 112px;
+  border: 1px solid #ededed;
+  border-radius: 8px;
+  padding: 18px;
+  background:
+    linear-gradient(90deg, #fafafa, #fff, #fafafa);
+  color: #222;
+}
+
+.loading-panel strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.loading-panel p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.loader-ring,
+.button-spinner {
+  flex: 0 0 auto;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+.loader-ring {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #111;
+}
+
+.button-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+}
+
+.loading-dots::after {
+  content: "";
+  animation: dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dots {
+  0% {
+    content: "";
+  }
+  25% {
+    content: ".";
+  }
+  50% {
+    content: "..";
+  }
+  75%,
+  100% {
+    content: "...";
+  }
 }
 
 .empty-text {
@@ -254,6 +342,53 @@ h1 {
 .resume-editor textarea:focus {
   border-color: #111;
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+}
+
+.repeatable-group {
+  margin-bottom: 16px;
+}
+
+.repeatable-head,
+.repeatable-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #222;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.repeatable-head button,
+.repeatable-card-head button {
+  min-height: 30px;
+  border: 1px solid #111;
+  border-radius: 6px;
+  padding: 0 10px;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.repeatable-card-head button:disabled {
+  cursor: not-allowed;
+  border-color: #d0d0d0;
+  color: #999;
+}
+
+.repeatable-card {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 12px;
+  background: #fafafa;
+}
+
+.repeatable-card label {
+  margin-bottom: 12px;
 }
 
 .pdf-button {
@@ -352,6 +487,39 @@ h1 {
   white-space: pre-line;
 }
 
+.resume-entry {
+  margin-bottom: 14px;
+}
+
+.resume-entry:last-child {
+  margin-bottom: 0;
+}
+
+.resume-entry-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.resume-entry-head strong {
+  color: #111;
+  font-size: 14px;
+}
+
+.resume-entry-head span,
+.resume-entry em {
+  color: #666;
+  font-size: 12px;
+  font-style: normal;
+}
+
+.resume-entry em {
+  display: block;
+  margin-bottom: 5px;
+}
+
 @media (max-width: 920px) {
   .resume-workspace {
     grid-template-columns: 1fr;
@@ -368,6 +536,11 @@ h1 {
     padding: 18px 16px;
     align-items: flex-start;
     gap: 16px;
+  }
+
+  .nav-link {
+    max-width: 42vw;
+    white-space: normal;
   }
 
   .module-nav {

@@ -62,8 +62,8 @@ def build_resume_pdf(resume):
     sections = [
         ("个人优势", resume.get("summary")),
         ("核心技能", resume.get("skills")),
-        ("工作 / 实习经历", resume.get("experience")),
-        ("项目经历", resume.get("projects")),
+        ("工作 / 实习经历", format_entries(resume.get("experience"), "organization")),
+        ("项目经历", format_entries(resume.get("projects"), "name")),
         ("教育经历", resume.get("education")),
         ("自我评价", resume.get("selfEvaluation")),
     ]
@@ -189,6 +189,34 @@ def decode_data_url(data_url):
 def to_paragraph_text(value):
     text = safe_text(value) or "暂无"
     return "<br/>".join(escape(line) for line in text.splitlines())
+
+
+def format_entries(entries, title_key):
+    if isinstance(entries, str):
+        return entries
+    if not isinstance(entries, list):
+        return ""
+
+    blocks = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        title = safe_text(entry.get(title_key)) or ("项目名称" if title_key == "name" else "公司 / 组织")
+        time = safe_text(entry.get("time"))
+        role = safe_text(entry.get("role"))
+        description = safe_text(entry.get("description"))
+
+        first_line = title
+        if time:
+            first_line = f"{first_line} | {time}"
+        lines = [first_line]
+        if role:
+            lines.append(role)
+        if description:
+            lines.append(description)
+        blocks.append("\n".join(lines))
+
+    return "\n\n".join(blocks)
 
 
 def safe_text(value):
