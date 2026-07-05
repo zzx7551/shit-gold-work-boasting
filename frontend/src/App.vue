@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 
 const SITE_TITLE = '一坨屎都能包装成金子的找工作包装网站'
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 
 const modes = [
   { value: 'resume', label: '简历包装' },
@@ -55,6 +56,10 @@ const canTransform = computed(() => interviewInput.value.trim().length > 0 && !l
 let experienceId = 2
 let projectId = 2
 
+function apiUrl(path) {
+  return `${API_BASE_URL}${path}`
+}
+
 async function transformText() {
   if (!canTransform.value) return
   loading.value = true
@@ -62,7 +67,7 @@ async function transformText() {
   interviewOutput.value = ''
 
   try {
-    const response = await fetch('/api/transform/', {
+    const response = await fetch(apiUrl('/api/transform/'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: interviewInput.value, mode: 'interview' })
@@ -130,7 +135,7 @@ function removeProject(id) {
 async function exportPdf() {
   exportingPdf.value = true
   try {
-    const response = await fetch('/api/resume/export-pdf/', {
+    const response = await fetch(apiUrl('/api/resume/export-pdf/'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ resume })
